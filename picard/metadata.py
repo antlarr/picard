@@ -240,6 +240,9 @@ class Metadata(dict):
         self.length = 0
         self.deleted_tags = set()
 
+    def __nonzero__(self):
+        return len(self) or len(self.images)
+
     def getall(self, name):
         return dict.get(self, name, [])
 
