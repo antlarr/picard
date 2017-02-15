@@ -144,11 +144,22 @@ class CoverArtThumbnail(ActiveLabel):
 
     def set_metadata(self, metadata):
         data = None
+<<<<<<< HEAD
         if metadata and metadata.images:
             log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
             data = [ image for image in metadata.images if image.is_front_image() ]
             if not data:
+=======
+        # Check if metadata has any images. It might have images even if
+        # metadata's dictionary is None
+        if getattr(metadata, 'images', None):
+            for image in metadata.images:
+                if image.is_front_image():
+                    data = image
+                    break
+            else:
+>>>>>>> Fix coverart display string and compare datahashes instead of image data
                 # There's no front image, choose the first one available
                 data = [ metadata.images[0] ]
         self.set_data(data)
@@ -206,8 +217,8 @@ class CoverArtBox(QtGui.QGroupBox):
 
     def _show(self):
         # We want to show the 2 coverarts only if they are different
-        # and orig_cover_art is not None
-        if getattr(self.orig_cover_art, 'data', None) is None or self.cover_art == self.orig_cover_art:
+        # and orig_cover_art data is set and not the default cd shadow
+        if self.orig_cover_art.data is None or self.cover_art == self.orig_cover_art:
             self.view_changes_button.setHidden(True)
             self.orig_cover_art.setHidden(True)
             self.cover_art_label.setText('')
@@ -215,8 +226,8 @@ class CoverArtBox(QtGui.QGroupBox):
         else:
             self.view_changes_button.setHidden(False)
             self.orig_cover_art.setHidden(False)
-            self.cover_art_label.setText(_(u'New Cover-Art'))
-            self.orig_cover_art_label.setText(_(u'Original Cover-Art'))
+            self.cover_art_label.setText(_(u'New Cover Art'))
+            self.orig_cover_art_label.setText(_(u'Original Cover Art'))
 
     def show(self):
         self.cover_art.show()
