@@ -182,7 +182,7 @@ class CoverArtImage:
                                                                 self.tempfile_filename)
 
     def __eq__(self, other):
-        if not other:
+        if not other or not isinstance(other, CoverArtImage):
             return False
         return self.datahash == other.datahash
 
