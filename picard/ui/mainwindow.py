@@ -945,6 +945,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.set_statusbar_message(msg, mparms, echo=None,
                                                history=None)
             elif isinstance(obj, Album):
+                obj.update_metadata_images()
                 metadata = obj.metadata
                 orig_metadata = obj.orig_metadata
             elif obj.can_edit_tags():
