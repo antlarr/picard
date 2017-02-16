@@ -83,12 +83,25 @@ class CoverArtThumbnail(ActiveLabel):
 
     def __eq__(self, other):
         if self.data and other.data:
-            return self.data.data == other.data.data
+            return self.data == other.data
         else:
             return False
 
     def show(self):
         self.set_data(self.data, True)
+
+    def decorate_cover(self, pixmap):
+        offx, offy, w, h = (1, 1, 121, 121)
+        cover = QtGui.QPixmap(self.shadow)
+        pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        painter = QtGui.QPainter(cover)
+        bgcolor = QtGui.QColor.fromRgb(0, 0, 0, 128)
+        painter.fillRect(QtCore.QRectF(offx, offy, w, h), bgcolor)
+        x = offx + (w - pixmap.width()) / 2
+        y = offy + (h - pixmap.height()) / 2
+        painter.drawPixmap(x, y, pixmap)
+        painter.end()
+        return cover
 
     def set_data(self, data, force=False, pixmap=None):
         if not force and self.data == data:
@@ -100,34 +113,44 @@ class CoverArtThumbnail(ActiveLabel):
 
         cover = self.shadow
         if self.data:
+            w, h, displacements = (121, 121, 20)
             if pixmap is None:
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(self.data.data)
-            if not pixmap.isNull():
-                offx, offy, w, h = (1, 1, 121, 121)
-                cover = QtGui.QPixmap(self.shadow)
-                pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-                painter = QtGui.QPainter(cover)
-                bgcolor = QtGui.QColor.fromRgb(0, 0, 0, 128)
-                painter.fillRect(QtCore.QRectF(offx, offy, w, h), bgcolor)
-                x = offx + (w - pixmap.width()) / 2
-                y = offy + (h - pixmap.height()) / 2
-                painter.drawPixmap(x, y, pixmap)
-                painter.end()
-        self.setPixmap(cover)
+                if len(self.data) == 1:
+                    pixmap = QtGui.QPixmap()
+                    pixmap.loadFromData(self.data[0].data)
+                else:
+                    stack_width, stack_height = (w+displacements*(len(self.data)-1), h+displacements*(len(self.data)-1))
+                    pixmap = QtGui.QPixmap(stack_width, stack_height)
+                    bgcolor = self.palette().color(QtGui.QPalette.Window)
+                    painter = QtGui.QPainter(pixmap)
+                    painter.fillRect(QtCore.QRectF(0, 0, stack_width, stack_height), bgcolor)
+                    x = w / 2
+                    y = h / 2
+                    for image in self.data:
+                        thumb = QtGui.QPixmap()
+                        thumb.loadFromData(image.data)
+                        thumb = self.decorate_cover( thumb )
+                        painter.drawPixmap(x - thumb.width()/2, y - thumb.height()/2, thumb)
+                        x += displacements
+                        y += displacements
+                    painter.end()
+                    pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                    self.setPixmap(pixmap)
+                    pixmap = None
+
+            if pixmap and not pixmap.isNull():
+                cover = self.decorate_cover( pixmap )
+                self.setPixmap(cover)
 
     def set_metadata(self, metadata):
         data = None
         if metadata and metadata.images:
-            print("%s using images:" % (self.name), metadata.images)
+            log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
-            for image in metadata.images:
-                if image.is_front_image():
-                    data = image
-                    break
-            else:
+            data = [ image for image in metadata.images if image.is_front_image() ]
+            if not data:
                 # There's no front image, choose the first one available
-                data = metadata.images[0]
+                data = [ metadata.images[0] ]
         self.set_data(data)
         release = None
         if metadata:
