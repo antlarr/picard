@@ -83,6 +83,10 @@ class CoverArtThumbnail(ActiveLabel):
         self.related_images = list()
 
     def __eq__(self, other):
+#       Fixme: Use all images for equality test, only the shown (front) images, or 
+#              remove equality test, since this is a QWidget and it's dangerous 
+#              to overload __eq__
+#        return self.related_images == other.related_images
         if self.data and other.data:
             return self.data == other.data
         else:
@@ -146,6 +150,10 @@ class CoverArtThumbnail(ActiveLabel):
     def set_metadata(self, metadata):
         data = None
         if metadata and metadata.images:
+<<<<<<< HEAD
+=======
+            self.related_images = metadata.images
+>>>>>>> Draw stack of covers when metadata contains multiple images
             log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
             data = [ image for image in metadata.images if image.is_front_image() ]
