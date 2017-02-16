@@ -80,6 +80,7 @@ class CoverArtThumbnail(ActiveLabel):
         self.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         self.clicked.connect(self.open_release_page)
         self.imageDropped.connect(self.fetch_remote_image)
+        self.related_images = list()
 
     def __eq__(self, other):
         if self.data and other.data:
@@ -145,6 +146,7 @@ class CoverArtThumbnail(ActiveLabel):
     def set_metadata(self, metadata):
         data = None
 <<<<<<< HEAD
+<<<<<<< HEAD
         if metadata and metadata.images:
             log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
@@ -154,6 +156,10 @@ class CoverArtThumbnail(ActiveLabel):
         # Check if metadata has any images. It might have images even if
         # metadata's dictionary is None
         if getattr(metadata, 'images', None):
+=======
+        if metadata and metadata.images:
+            self.related_images = metadata.images
+>>>>>>> Show the image-diff viewer even when images other than the front image have changed
             for image in metadata.images:
                 if image.is_front_image():
                     data = image
