@@ -93,6 +93,9 @@ class DataHash:
     def filename(self):
         return self._filename
 
+    def __eq__(self, other):
+        return self._hash == other._hash
+
 
 class CoverArtImageError(Exception):
     pass
@@ -174,6 +177,11 @@ class CoverArtImage:
                                                                 self.extension,
                                                                 self.datalength,
                                                                 self.tempfile_filename)
+
+    def __eq__(self, other):
+        if not other:
+            return False
+        return self.datahash == other.datahash
 
     def __repr__(self):
         p = []
