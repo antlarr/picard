@@ -145,27 +145,11 @@ class CoverArtThumbnail(ActiveLabel):
 
     def set_metadata(self, metadata):
         data = None
-<<<<<<< HEAD
-<<<<<<< HEAD
         if metadata and metadata.images:
             log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
             data = [ image for image in metadata.images if image.is_front_image() ]
             if not data:
-=======
-        # Check if metadata has any images. It might have images even if
-        # metadata's dictionary is None
-        if getattr(metadata, 'images', None):
-=======
-        if metadata and metadata.images:
-            self.related_images = metadata.images
->>>>>>> Show the image-diff viewer even when images other than the front image have changed
-            for image in metadata.images:
-                if image.is_front_image():
-                    data = image
-                    break
-            else:
->>>>>>> Fix coverart display string and compare datahashes instead of image data
                 # There's no front image, choose the first one available
                 data = [ metadata.images[0] ]
         self.set_data(data)
