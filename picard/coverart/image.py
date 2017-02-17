@@ -74,7 +74,7 @@ class DataHash:
         if self._filename:
             try:
                 os.unlink(self._filename)
-            except:
+            except OSError:
                 pass
             else:
                 _datafile_mutex.lock()
@@ -95,9 +95,6 @@ class DataHash:
     @property
     def filename(self):
         return self._filename
-
-    def __eq__(self, other):
-        return self._hash == other._hash
 
 
 class CoverArtImageError(Exception):
@@ -184,7 +181,7 @@ class CoverArtImage:
     def __eq__(self, other):
         if not other or not isinstance(other, CoverArtImage):
             return False
-        return self.datahash == other.datahash
+        return (self.datahash, self.types) == (other.datahash, other.types)
 
     def __repr__(self):
         p = []
@@ -210,12 +207,6 @@ class CoverArtImage:
 
     def __str__(self):
         return unicode(self).encode('utf-8')
-
-    def __eq__(self, other):
-        if self and other:
-            return (self.datahash, self.types) == (other.datahash, other.types)
-        else:
-            return False
 
     def set_data(self, data):
         """Store image data in a file, if data already exists in such file
@@ -245,7 +236,7 @@ class CoverArtImage:
         """
         if self.is_front_image() or not self.types or u'front' in self.types:
             return u'front'
-        # TODO: do something better than randomly using the first in the list
+        # TODO: do something better than randomly using the first in the list
         return self.types[0]
 
     def _make_image_filename(self, filename, dirname, metadata):
@@ -276,7 +267,7 @@ class CoverArtImage:
         if not self.can_be_saved_to_disk:
             return
         if (config.setting["caa_image_type_as_filename"] and
-            not self.is_front_image()):
+                not self.is_front_image()):
             filename = self.maintype
             log.debug("Make cover filename from types: %r -> %r",
                       self.types, filename)
