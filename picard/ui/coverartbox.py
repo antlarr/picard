@@ -80,13 +80,6 @@ class CoverArtThumbnail(ActiveLabel):
         self.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         self.clicked.connect(self.open_release_page)
         self.imageDropped.connect(self.fetch_remote_image)
-        self.related_images = list()
-
-    def __eq__(self, other):
-        if self.data and other.data:
-            return self.data == other.data
-        else:
-            return False
 
     def show(self):
         self.set_data(self.data, True)
@@ -146,7 +139,6 @@ class CoverArtThumbnail(ActiveLabel):
     def set_metadata(self, metadata):
         data = None
         if metadata and metadata.images:
-            self.related_images = metadata.images
             log.debug("%s using images:" % (self.name), metadata.images)
             # TODO: Combine all images to show there are different images in use instead of getting the first one
             data = [ image for image in metadata.images if image.is_front_image() ]
@@ -209,7 +201,7 @@ class CoverArtBox(QtGui.QGroupBox):
     def _show(self):
         # We want to show the 2 coverarts only if they are different
         # and orig_cover_art data is set and not the default cd shadow
-        if self.orig_cover_art.data is None or self.cover_art == self.orig_cover_art:
+        if self.orig_cover_art.data is None or self.cover_art.data == self.orig_cover_art.data:
             self.view_changes_button.setHidden(True)
             self.orig_cover_art.setHidden(True)
             self.cover_art_label.setText('')
